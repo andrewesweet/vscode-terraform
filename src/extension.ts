@@ -112,8 +112,8 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
       handleDiagnostics: (uri, diagnostics, next) => {
         // Filter false-positive diagnostics for Terraform 1.12+ test syntax in .tftest.hcl files.
         // The language server (terraform-ls) does not yet recognize the top-level `test {}` block,
-        // the `state_key` attribute, or the `parallel` attribute introduced for parallel test
-        // execution in Terraform 1.12.
+        // or the `state_key`, `parallel`, and `skip_cleanup` attributes introduced for parallel
+        // test execution in Terraform 1.12.
         // See: https://github.com/hashicorp/vscode-terraform/issues/2057
         if (uri.fsPath.endsWith('.tftest.hcl')) {
           diagnostics = diagnostics.filter((diagnostic) => {
@@ -125,6 +125,9 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
               return false;
             }
             if (msg.includes('"parallel" is not expected here')) {
+              return false;
+            }
+            if (msg.includes('"skip_cleanup" is not expected here')) {
               return false;
             }
             return true;
